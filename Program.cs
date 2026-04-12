@@ -11,7 +11,8 @@ builder.Services.AddSwaggerGen();
 // PostgreSQL connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.CommandTimeout(120) // 120 seconds timeout
     ));
 
 var app = builder.Build();
