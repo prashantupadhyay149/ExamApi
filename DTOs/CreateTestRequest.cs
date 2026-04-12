@@ -5,6 +5,7 @@ namespace ExamApi.DTOs
     public class CreateTestRequest
     {
         public string Title { get; set; }
+        public int TeacherId { get; set; }   // ✅ moved from query to body
         public List<QuestionDto> Questions { get; set; }
     }
 
