@@ -70,6 +70,55 @@ namespace ExamApi.Controllers
             });
         }
 
+        [HttpPost("create-test-only")]
+        public async Task<IActionResult> CreateTestOnly([FromQuery] int teacherId, [FromBody] CreateTestOnlyRequest request)
+        {
+            var teacher = await _context.Users.FindAsync(teacherId);
+            if (teacher == null || teacher.Role != "teacher")
+                return Unauthorized();
+
+            var test = new Test
+            {
+                Title = request.Title,
+                TeacherId = teacherId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Tests.Add(test);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { testId = test.Id, message = "Test created successfully" });
+        }
+
+        [HttpPost("add-question")]
+        public async Task<IActionResult> AddQuestion([FromBody] AddQuestionRequest request)
+        {
+            var test = await _context.Tests.FindAsync(request.TestId);
+            if (test == null) return NotFound("Test not found");
+
+            var question = new Question
+            {
+                TestId = request.TestId,
+                Text = request.Text,
+                Type = request.Type,
+                OptionsJson = request.OptionsJson,
+                CorrectAnswer = request.CorrectAnswer
+            };
+            _context.Questions.Add(question);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { questionId = question.Id, message = "Question added successfully" });
+        }
+
+        [HttpGet("my-tests")]
+        public async Task<IActionResult> GetMyTests([FromQuery] int teacherId)
+        {
+            var tests = await _context.Tests
+                .Where(t => t.TeacherId == teacherId)
+                .Select(t => new { t.Id, t.Title, t.CreatedAt, QuestionCount = t.Questions.Count })
+                .ToListAsync();
+            return Ok(tests);
+        }
+
         // Other APIs (same as before)
     }
 }
