@@ -95,8 +95,7 @@ namespace ExamApi.Controllers
             try
             {
                 var test = await _context.Tests.FindAsync(request.TestId);
-                if (test == null)
-                    return NotFound(new { message = "Test not found" });
+                if (test == null) return NotFound(new { message = "Test not found" });
 
                 var question = new Question
                 {
@@ -108,15 +107,16 @@ namespace ExamApi.Controllers
                 };
                 _context.Questions.Add(question);
                 await _context.SaveChangesAsync();
-
-                // IMPORTANT: Use the saved Id only, not the whole entity
                 return Ok(new { questionId = question.Id, message = "Question added successfully" });
             }
             catch (Exception ex)
             {
-                // Log the error (you can inject ILogger)
-                Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, new { error = ex.Message });
+                // Log the full exception details
+                Console.WriteLine($"ERROR: {ex.Message}");
+                Console.WriteLine($"STACK: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                    Console.WriteLine($"INNER: {ex.InnerException.Message}");
+                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
             }
         }
         [HttpGet("my-tests")]
