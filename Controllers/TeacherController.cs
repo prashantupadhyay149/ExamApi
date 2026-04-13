@@ -92,23 +92,33 @@ namespace ExamApi.Controllers
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] AddQuestionRequest request)
         {
-            var test = await _context.Tests.FindAsync(request.TestId);
-            if (test == null) return NotFound("Test not found");
-
-            var question = new Question
+            try
             {
-                TestId = request.TestId,
-                Text = request.Text,
-                Type = request.Type,
-                OptionsJson = request.OptionsJson,
-                CorrectAnswer = request.CorrectAnswer
-            };
-            _context.Questions.Add(question);
-            await _context.SaveChangesAsync();
+                var test = await _context.Tests.FindAsync(request.TestId);
+                if (test == null)
+                    return NotFound(new { message = "Test not found" });
 
-            return Ok(new { questionId = question.Id, message = "Question added successfully" });
+                var question = new Question
+                {
+                    TestId = request.TestId,
+                    Text = request.Text,
+                    Type = request.Type,
+                    OptionsJson = request.OptionsJson,
+                    CorrectAnswer = request.CorrectAnswer
+                };
+                _context.Questions.Add(question);
+                await _context.SaveChangesAsync();
+
+                // IMPORTANT: Use the saved Id only, not the whole entity
+                return Ok(new { questionId = question.Id, message = "Question added successfully" });
+            }
+            catch (Exception ex)
+            {
+                // Log the error (you can inject ILogger)
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
-
         [HttpGet("my-tests")]
         public async Task<IActionResult> GetMyTests([FromQuery] int teacherId)
         {
