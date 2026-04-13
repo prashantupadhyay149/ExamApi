@@ -1,6 +1,4 @@
-﻿namespace ExamApi.DTOs
+﻿public class CreateTestOnlyRequest
 {
-    public class CreateTestOnlyRequest
-    {
-    }
+    public string Title { get; set; }
 }
