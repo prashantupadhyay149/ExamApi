@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions => npgsqlOptions.CommandTimeout(120) // 120 seconds timeout
+        npgsqlOptions => npgsqlOptions.CommandTimeout(30) // 120 seconds timeout
     ));
 
 var app = builder.Build();
